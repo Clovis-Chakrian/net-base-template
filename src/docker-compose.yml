@@ -1,0 +1,17 @@
+services:
+  postgres:
+      image: 'postgres'
+      ports:
+        - 5432:5432
+      # volumes:
+      #   - ./data:/var/lib/postgresql/data
+      environment:
+        POSTGRES_PASSWORD: '12345678'
+        POSTGRES_USER: 'user'
+        POSTGRES_DB: 'ModularMonolithDb'
+      networks:
+        - pgdb-network
+
+networks:
+  pgdb-network:
+    driver: bridge

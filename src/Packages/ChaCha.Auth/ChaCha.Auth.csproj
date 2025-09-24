@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.20" />
+    <PackageReference Include="OpenIddict.Abstractions" Version="7.1.0" />
+    <PackageReference Include="OpenIddict.AspNetCore" Version="7.0.0" />
+    <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="7.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ChaCha.MediatR\ChaCha.MediatR.csproj" />
+    <ProjectReference Include="..\ChaCha.Core\ChaCha.Core.csproj" />
+  </ItemGroup>
+</Project>
