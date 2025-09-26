@@ -1,6 +1,8 @@
-﻿using ChaCha.Data.Persistence.UnitOfWork;
+﻿using ChaCha.Bus;
+using ChaCha.Data.Persistence.UnitOfWork;
 using ChaCha.MediatR.Extensions;
 using ChaCha.Notification.Application.NotificationsSent.Commands.NewUserCreated;
+using ChaCha.Notification.Application.NotificationsSent.Integration;
 using ChaCha.Notification.Infra.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +20,9 @@ public static class NotificationModuleDependencyInjection
       options.UseNpgsql(Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING") ??
         "Server=localhost; Database=ModularMonolithDb; User Id=user; Password=12345678");
     });
+    
+    services.AddMessageBus();
+    services.AddHostedService<NotificationSentIntegrationEventsHandler>();
 
     return services;
   }

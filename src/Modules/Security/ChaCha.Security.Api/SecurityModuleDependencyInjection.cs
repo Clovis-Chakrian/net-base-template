@@ -1,4 +1,5 @@
 using ChaCha.Auth;
+using ChaCha.Bus;
 using ChaCha.Data.Persistence.UnitOfWork;
 using ChaCha.MediatR.Extensions;
 using ChaCha.Security.Application.Auth.v1.Commands.ConnectToken.LoginStrategies;
@@ -28,7 +29,8 @@ public static class SecurityModuleDependencyInjection
     services.AddIdentityCore<User>()
       // .AddRoles<IdentityRole>()
       .AddEntityFrameworkStores<SecurityDbContext>();
-
+      
+    services.AddMessageBus();
     services.AddHostedService<Worker>();
     services.AddOpenIddict()
       .AddCore(options =>
