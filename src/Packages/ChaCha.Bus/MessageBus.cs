@@ -1,3 +1,4 @@
+using ChaCha.Bus.Base;
 using EasyNetQ;
 using Polly;
 using RabbitMQ.Client.Exceptions;
@@ -5,8 +6,9 @@ using RabbitMQ.Client.Exceptions;
 namespace ChaCha.Bus;
 
 #nullable disable
-public class MessageBus : IMessageBus
+public class MessageBus : IMessageBus, IDisposable
 {
+  private bool _disposed = false;
   private IBus _bus;
   private IAdvancedBus _advancedBus;
   private readonly string _connectionString;
@@ -19,9 +21,9 @@ public class MessageBus : IMessageBus
     TryConnect();
   }
 
-  public async Task PublishAsync<TEvent, TMessage, TMessageType>(TEvent integrationEvent, CancellationToken cancellationToken = default)
-    where TEvent : IntegrationEvent<TMessage, TMessageType>
-    where TMessage : Message<TMessageType>
+  public async Task PublishAsync<TEvent, TMessage>(TEvent integrationEvent, CancellationToken cancellationToken = default)
+    where TEvent : IntegrationEvent<TMessage>
+    where TMessage : class
   {
     TryConnect();
 
@@ -35,7 +37,7 @@ public class MessageBus : IMessageBus
       cancellationToken: cancellationToken);
   }
 
-  public async Task SubscribeAsync<TMessageType>(string exchangeName, string queueName, string bindingKey, Func<TMessageType, CancellationToken, Task> onMessage, CancellationToken cancellationToken = default) where TMessageType : class
+  public async Task SubscribeAsync<TMessage>(string exchangeName, string queueName, string bindingKey, Func<TMessage, CancellationToken, Task> onMessage, CancellationToken cancellationToken = default) where TMessage : class
   {
     TryConnect();
 
@@ -60,9 +62,60 @@ public class MessageBus : IMessageBus
       cancellationToken: cancellationToken
       );
 
-    _advancedBus.Consume<TMessageType>(
+    _advancedBus.Consume<TMessage>(
       queue,
       (message, info) => onMessage(message.Body, cancellationToken),
+      cfg =>
+      {
+        cfg.WithAutoAck();
+      }
+      );
+  }
+
+  public void Publish<TEvent, TMessage>(TEvent integrationEvent, CancellationToken cancellationToken = default)
+    where TEvent : IntegrationEvent<TMessage>
+    where TMessage : class
+  {
+    TryConnect();
+
+    var exchange = _advancedBus.ExchangeDeclare(integrationEvent.Exchange, ExchangeType.Topic, cancellationToken: cancellationToken);
+
+    _advancedBus.Publish(
+      exchange: exchange,
+      routingKey: integrationEvent.RoutingKey,
+      mandatory: false,
+      message: integrationEvent.Message,
+      cancellationToken: cancellationToken);
+  }
+
+  public void Subscribe<TMessage>(string exchangeName, string queueName, string bindingKey, Func<TMessage, CancellationToken> onMessage, CancellationToken cancellationToken = default) where TMessage : class
+  {
+    TryConnect();
+
+    var queue = _advancedBus
+      .QueueDeclare(
+        name: queueName,
+        cfg =>
+        {
+          cfg.AsDurable(true);
+          cfg.AsAutoDelete(false);
+        },
+        cancellationToken: cancellationToken
+      );
+
+    var exchange = _advancedBus.ExchangeDeclare(exchangeName, ExchangeType.Topic, cancellationToken: cancellationToken);
+
+    _advancedBus.Bind(
+      exchange: exchange,
+      queue: queue,
+      routingKey: bindingKey,
+      arguments: null,
+      cancellationToken: cancellationToken
+      );
+
+    _advancedBus.Consume<TMessage>(
+      queue,
+      (message, info) => onMessage(message.Body),
       cfg =>
       {
         cfg.WithAutoAck();
@@ -112,9 +165,28 @@ public class MessageBus : IMessageBus
 
     policy.Execute(TryConnect);
   }
-
   public void Dispose()
   {
-    _advancedBus.Dispose();
+    Dispose(true);
+    GC.SuppressFinalize(this);
+  }
+
+  protected virtual void Dispose(bool disposing)
+  {
+    if (_disposed)
+      return;
+
+    if (disposing)
+    {
+      _advancedBus?.Dispose();
+      _bus?.Dispose();
+    }
+
+    _disposed = true;
+  }
+
+  ~MessageBus()
+  {
+    Dispose(false);
   }
 }

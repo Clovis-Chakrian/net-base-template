@@ -1,7 +1,7 @@
 ﻿using ChaCha.Bus;
 using ChaCha.Data.Persistence.UnitOfWork;
 using ChaCha.MediatR.Extensions;
-using ChaCha.Notification.Application.NotificationsSent.Commands.NewUserCreated;
+using ChaCha.Notification.Application.NotificationsSent.Commands.SendWelcomeEmail;
 using ChaCha.Notification.Application.NotificationsSent.Integration;
 using ChaCha.Notification.Infra.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +13,7 @@ public static class NotificationModuleDependencyInjection
 {
   public static IServiceCollection AddNotificationModule(this IServiceCollection services)
   {
-    services.AddMediator(typeof(NewUserCreatedCommand).Assembly);
+    services.AddMediator(typeof(SendWelcomeEmailCommand).Assembly);
     services.AddScoped<IUnitOfWork, UnitOfWork<NotificationDbContext>>();
     services.AddDbContext<NotificationDbContext>(options =>
     {

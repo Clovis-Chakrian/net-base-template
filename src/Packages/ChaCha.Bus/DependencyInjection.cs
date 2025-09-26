@@ -1,3 +1,4 @@
+using ChaCha.Bus;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ChaCha.Bus;

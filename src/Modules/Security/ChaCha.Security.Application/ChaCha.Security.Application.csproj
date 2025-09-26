@@ -9,5 +9,6 @@
     <ProjectReference Include="..\ChaCha.Security.Domain\ChaCha.Security.Domain.csproj" />
     <ProjectReference Include="..\ChaCha.Security.Infra\ChaCha.Security.Infra.csproj" />
     <ProjectReference Include="..\..\..\Packages\ChaCha.Bus\ChaCha.Bus.csproj" />
+    <ProjectReference Include="..\..\..\Packages\ChaCha.IntegrationEvents\ChaCha.IntegrationEvents.csproj" />
   </ItemGroup>
 </Project>
