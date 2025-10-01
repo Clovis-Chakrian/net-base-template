@@ -5,11 +5,11 @@ using Microsoft.Extensions.Logging;
 
 namespace ChaCha.Data.Persistence;
 
-public class BaseDbContext : DbContext
+public class ApplicationDbContext : DbContext
 {
   private readonly IMediator _mediator;
 
-  public BaseDbContext(DbContextOptions options, IMediator mediator) : base(options)
+  public ApplicationDbContext(DbContextOptions options, IMediator mediator) : base(options)
   {
     _mediator = mediator;
   }

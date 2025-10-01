@@ -1,27 +1,34 @@
 services:
   postgres:
-      image: 'postgres'
-      ports:
-        - 5432:5432
-      # volumes:
-      #   - ./data:/var/lib/postgresql/data
-      environment:
-        POSTGRES_PASSWORD: '12345678'
-        POSTGRES_USER: 'user'
-        POSTGRES_DB: 'ModularMonolithDb'
-      networks:
-        - compose-network
+    image: 'postgres'
+    ports:
+      - 5432:5432
+    # volumes:
+    #   - ./data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: '12345678'
+      POSTGRES_USER: 'user'
+      POSTGRES_DB: 'ModularMonolithDb'
+    networks:
+      - compose-network
 
   rabbitmq:
-      image: 'rabbitmq:3-management'
-      ports:
-        - 5672:5672
-        - 15672:15672
-      environment:
-        RABBITMQ_DEFAULT_USER: 'guest'
-        RABBITMQ_DEFAULT_PASS: 'guest'
-      networks:
-        - compose-network
+    image: 'rabbitmq:3-management'
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: 'guest'
+      RABBITMQ_DEFAULT_PASS: 'guest'
+    networks:
+      - compose-network
+
+  redis:
+    image: 'redis:6.2'
+    ports:
+      - 6379:6379
+    networks:
+      - compose-network
 
 networks:
   compose-network:

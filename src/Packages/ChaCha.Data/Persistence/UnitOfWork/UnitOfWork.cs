@@ -11,9 +11,15 @@ public class UnitOfWork<TDbContext> : IUnitOfWork where TDbContext : DbContext
     _context = context;
   }
 
-  public async Task<bool> Commit(CancellationToken cancellationToken = default)
+  public async Task<bool> CommitAsync(CancellationToken cancellationToken = default)
   {
     var result = await _context.SaveChangesAsync(cancellationToken);
+    return result > 0;
+  }
+
+  public bool Commit()
+  {
+    var result =  _context.SaveChanges();
     return result > 0;
   }
 }

@@ -11,6 +11,9 @@ public sealed class TokenType : Entity<ETokenType>
   public int ResentLimit { get; private set; }
   public int TokenLength { get; private set; }
 
+  private TokenType() : base(default!)
+  {}
+  
   private TokenType(ETokenType id, string name, string description, int expirationTime, int maxAttempts, int resentLimit, int tokenLength) : base(id)
   {
     Name = name;

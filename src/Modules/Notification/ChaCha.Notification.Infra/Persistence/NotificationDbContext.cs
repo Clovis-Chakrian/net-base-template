@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChaCha.Notification.Infra.Persistence;
 
-public class NotificationDbContext : BaseDbContext
+public class NotificationDbContext : ApplicationDbContext
 {
   public NotificationDbContext(DbContextOptions options, IMediator mediator) : base(options, mediator)
   {
