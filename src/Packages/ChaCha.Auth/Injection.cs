@@ -1,91 +1,89 @@
+using ChaCha.Auth.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
+using OpenIddict.Abstractions;
+using OpenIddict.Validation.AspNetCore;
 
 namespace ChaCha.Auth;
 
 public static class Injection
 {
-  public static IServiceCollection AddAuthServer(this IServiceCollection services)
+  public static IServiceCollection AddAuthServer<TUser, TDbContext>(this IServiceCollection services)
+    where TUser : ApplicationUser
+    where TDbContext : DbContext
   {
-    services.AddOpenIddict()
+    services.AddIdentityCore<TUser>()
+      .AddEntityFrameworkStores<TDbContext>();
 
-        // Register the OpenIddict server components.
+    services.AddOpenIddict()
+        .AddCore(options =>
+        {
+          options.UseEntityFrameworkCore()
+            .UseDbContext<TDbContext>();
+        })
         .AddServer(options =>
         {
+          options.SetIssuer(new Uri("https://localhost:5137/"));
+
           options
+            .UseReferenceAccessTokens()
             .UseReferenceRefreshTokens()
             .SetRefreshTokenLifetime(TimeSpan.FromDays(180))
             .SetAccessTokenLifetime(TimeSpan.FromMinutes(15));
 
-          // options.UseDataProtection();
-
-          // Enable the token endpoint.
           options.SetTokenEndpointUris("connect/token");
+          options.SetIntrospectionEndpointUris("/connect/introspect");
+          options.SetUserInfoEndpointUris("/connect/userinfo");
           options.SetAuthorizationEndpointUris("connect/authorize");
-          // Enable the client credentials flow.
 
           options.AllowClientCredentialsFlow();
           options.AllowAuthorizationCodeFlow();
           options.AllowRefreshTokenFlow();
           options.AllowPasswordFlow();
+          options.RegisterScopes(OpenIddictConstants.Scopes.OpenId, OpenIddictConstants.Scopes.Profile, OpenIddictConstants.Scopes.Email, "api", OpenIddictConstants.Scopes.OfflineAccess);
 
-          // Register the signing and encryption credentials.
-          options.AddDevelopmentEncryptionCertificate()
-            .AddDevelopmentSigningCertificate();
+
+          options.AddDevelopmentSigningCertificate();
+          options.AddDevelopmentEncryptionCertificate();
 
           options.DisableAccessTokenEncryption();
 
-          // Register the ASP.NET Core host and configure the ASP.NET Core options.
           options.UseAspNetCore()
-            .EnableTokenEndpointPassthrough();
+            .EnableTokenEndpointPassthrough()
+            .EnableUserInfoEndpointPassthrough();
         })
-        .AddValidation(options =>
-    {
-      // Note: the validation handler uses OpenID Connect discovery
-      // to retrieve the issuer signing keys used to validate tokens.
-      options.SetIssuer("https://localhost:5137/");
-      // options.UseDataProtection();
-      // Register the encryption credentials. This sample uses a symmetric
-      // encryption key that is shared between the server and the API project.
-      //
-      // Note: in a real world application, this encryption key should be
-      // stored in a safe place (e.g in Azure KeyVault, stored as a secret).
-      options.AddEncryptionKey(new SymmetricSecurityKey(
-          Convert.FromBase64String("DRjd/GnduI3Efzen9V9BvbNUfc/VKgXltV7Kbk9sMkY=")));
+        .AddValidation(o =>
+        {
+          o.UseLocalServer(); 
+          o.UseAspNetCore();   
+        });
 
-      // Register the System.Net.Http integration.
-      options.UseSystemNetHttp();
-
-      // Register the ASP.NET Core host.
-      options.UseAspNetCore();
-    });
+    services.AddAuthentication(o =>
+      {
+        o.DefaultScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+        o.DefaultAuthenticateScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+        o.DefaultChallengeScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+      });
 
     return services;
   }
 
-  // public static IServiceCollection AddAuthDbConfiguration(this IServiceCollection services)
-  // {
-  //   services.AddDbContext<TDbContext>(options =>
-  //     {
-  //        // Configure Entity Framework Core to use Microsoft SQL Server.
-  //       options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+  public static IServiceCollection AddAuthClient(this IServiceCollection services)
+  {
+    services.AddAuthentication(options =>
+    {
+      options.DefaultScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+    });
 
-  //        // Register the entity sets needed by OpenIddict.
-  //        // Note: use the generic overload if you need to replace the default OpenIddict entities.
-  //       options.UseOpenIddict();
-  //     });
+    services
+      .AddOpenIddict()
+      .AddValidation(options =>
+      {
+        options.UseLocalServer();
 
-  //   services.AddOpenIddict()
-
-  //       // Register the OpenIddict core components.
-  //       .AddCore(options =>
-  //       {
-  //         // Configure OpenIddict to use the Entity Framework Core stores and models.
-  //         // Note: call ReplaceDefaultEntities() to replace the default entities.
-  //         options.UseEntityFrameworkCore()
-  //           .UseDbContext<TDbContext>();
-  //       });
-  //   return services;
-  // }
+        options.UseAspNetCore();
+      })
+      ;
+    return services;
+  }
 }

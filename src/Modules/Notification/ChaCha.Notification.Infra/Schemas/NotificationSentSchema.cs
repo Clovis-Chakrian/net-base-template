@@ -1,7 +1,9 @@
+using ChaCha.Core.Extensions;
 using ChaCha.Data.Schemas;
 using ChaCha.Notification.Domain.NotificationsSent;
-using Microsoft.EntityFrameworkCore;
+using ChaCha.Notification.Domain.NotificationTemplates;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ChaCha.Notification.Infra.Schemas;
 
@@ -10,31 +12,38 @@ public class NotificationSentSchema : BaseSchema<NotificationSent, Guid>
   public override void Configure(EntityTypeBuilder<NotificationSent> builder)
   {
     base.Configure(builder);
-    
-    builder.Property(e => e.MessageId)
-      .IsRequired(false)
-      .HasMaxLength(255);
 
-    builder.Property(e => e.MessageTemplateId)
-      .IsRequired()
-      .HasMaxLength(255);
+    builder.Property(p => p.NotificationExternalProviderRequestId)
+      .HasMaxLength(30);
 
-    builder.Property(e => e.SentDate)
-      .IsRequired(false);
+    builder.Property(p => p.Status)
+      .HasConversion(
+        new ValueConverter<ENotificationStatus, string>(
+          v => v.GetDescription(),
+          v => EnumExtensions.FromDescription<ENotificationStatus>(v)
+        ))
+      .HasMaxLength(25);
 
-    builder.Property(e => e.Personalizations)
-      .IsRequired()
-      .HasColumnType("jsonb");
+    builder.HasOne(p => p.NotificationTemplate)
+      .WithMany()
+      .HasForeignKey(p => p.NotificationTemplateId);
 
-    builder.Property(e => e.NotificationProvider)
-      .IsRequired()
-      .HasConversion<string>();
+    builder.HasOne(p => p.NotificationType)
+      .WithMany()
+      .HasForeignKey(p => p.NotificationTypeId);
 
-    builder.Property(e => e.NotificationMethod)
-      .IsRequired()
-      .HasConversion<string>();
+    builder.HasOne(p => p.NotificationChannel)
+      .WithMany(p => p.NotificationSents)
+      .HasForeignKey(p => p.NotificationChannelId);
 
-    builder.HasIndex(e => e.MessageId)
-      .IsUnique(true);
+    builder.HasOne(p => p.NotificationExternalProvider)
+      .WithMany(p => p.NotificationSents)
+      .HasForeignKey(p => p.NotificationExternalProviderId);
+
+    builder.HasMany(p => p.ReasonsNotSent)
+      .WithOne(p => p.NotificationSent);
+
+    builder.HasMany(p => p.NotificationSentParamValues)
+      .WithOne(p => p.NotificationSent);
   }
 }

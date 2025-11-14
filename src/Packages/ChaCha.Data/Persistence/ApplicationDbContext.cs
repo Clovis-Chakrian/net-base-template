@@ -68,7 +68,7 @@ public class ApplicationDbContext : DbContext
 
     foreach (var domainEvent in domainEvents)
     {
-      _mediator.PublishEvent(domainEvent, cancellationToken);
+      await _mediator.PublishEvent(domainEvent, cancellationToken).ConfigureAwait(false);
     }
 
     foreach (var entity in entities)

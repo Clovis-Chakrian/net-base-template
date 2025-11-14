@@ -100,7 +100,7 @@ internal class MediatorHandler(IServiceProvider serviceProvider, ILogger<Mediato
     throw new InvalidOperationException($"Handler for query of type {query.GetType().Name} returned invalid result");
   }
 
-  public void PublishEvent(IDomainEvent domainEvent, CancellationToken cancellationToken = default)
+  public Task PublishEvent(IDomainEvent domainEvent, CancellationToken cancellationToken = default)
   {
     _logger.LogInformation("Sending domain event of type {DomainEvent}", domainEvent.GetType().Name);
     var handlerType = typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType());
@@ -113,6 +113,6 @@ internal class MediatorHandler(IServiceProvider serviceProvider, ILogger<Mediato
     }
 
     _logger.LogInformation("Calling handler for domain event of type {DomainEvent}", domainEvent.GetType().Name);
-    handler.Handle((dynamic)domainEvent, cancellationToken);
+    return handler.Handle((dynamic)domainEvent, cancellationToken);
   }
 }

@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ChaCha.Security.Application.Auth.v1.Commands.ConnectToken;
 
-public class ConnectTokenCommandHandler : ICommandHandler<ConnectTokenCommand, SignInResult>
+public class ConnectTokenCommandHandler : ICommandHandler<ConnectTokenCommand, IActionResult>
 {
   private readonly IServiceProvider _serviceProvider;
   public ConnectTokenCommandHandler(IServiceProvider serviceProvider)
@@ -14,9 +14,9 @@ public class ConnectTokenCommandHandler : ICommandHandler<ConnectTokenCommand, S
     _serviceProvider = serviceProvider;
   }
 
-  public async Task<Result<SignInResult>> Handle(ConnectTokenCommand command, CancellationToken cancellationToken)
+  public async Task<Result<IActionResult>> Handle(ConnectTokenCommand command, CancellationToken cancellationToken)
   {
-    var result = Result<SignInResult>.Create();
+    var result = Result<IActionResult>.Create();
     var loginStrategy = _serviceProvider.GetKeyedService<ILoginStrategy>(command.OpenIddictRequest.GrantType);
 
     if (loginStrategy is null)

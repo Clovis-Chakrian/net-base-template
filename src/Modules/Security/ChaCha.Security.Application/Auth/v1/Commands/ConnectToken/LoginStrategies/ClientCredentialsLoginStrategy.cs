@@ -14,7 +14,7 @@ public sealed class ClientCredentialsLoginStrategy : ILoginStrategy
   {
     _applicationManager = applicationManager;
   }
-  public async Task<SignInResult> HandleLogin(OpenIddictRequest request, CancellationToken cancellationToken)
+  public async Task<IActionResult> HandleLogin(OpenIddictRequest request, CancellationToken cancellationToken)
   {
     // Note: the client credentials are automatically validated by OpenIddict:
     // if client_id or client_secret are invalid, this action won't be invoked.

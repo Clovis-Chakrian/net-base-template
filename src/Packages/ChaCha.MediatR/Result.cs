@@ -27,6 +27,11 @@ public abstract class BaseResult
 
   public virtual void HandleResult(ValidationResult validationResult)
   {
+    foreach (var error in ValidationResult.Errors)
+    {
+      AddFailure(error.PropertyName, error.ErrorMessage);
+    }
+
     IsValid = validationResult.IsValid;
   }
 }

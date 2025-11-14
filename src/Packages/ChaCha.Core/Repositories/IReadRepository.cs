@@ -4,13 +4,13 @@ using ChaCha.Core.Repositories.Pagination;
 
 namespace ChaCha.Core.Repositories;
 
-public interface IReadRepository<TEntity, TId> 
-    where TEntity : Entity<TId> 
-    
+public interface IReadRepository<TEntity, TId>
+    where TEntity : Entity<TId>
+
 {
     TEntity? Find(TId id);
     Task<TEntity?> FindAsync(TId id);
-
+    Task<TEntity?> FindAsync(Expression<Func<TEntity, bool>> predicate, IEnumerable<string> includes, bool useCache = true);
     Page<TEntity> FindAll<T>(Expression<Func<TEntity, bool>> predicate, int page, int pageSize,
         Expression<Func<TEntity, T>> orderBy);
 

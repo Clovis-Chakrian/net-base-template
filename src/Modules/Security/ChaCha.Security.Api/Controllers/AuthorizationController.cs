@@ -1,6 +1,8 @@
 using ChaCha.MediatR.Mediator;
 using ChaCha.Security.Application.Auth.v1.Commands.ConnectToken;
+using ChaCha.Security.Application.Auth.v1.Queries.UserInfo;
 using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Abstractions;
 
@@ -18,11 +20,27 @@ public class AuthorizationController : ControllerBase
   }
 
   [HttpPost("connect/token"), Produces("application/json")]
-  public async Task<IActionResult> Exchange()
+  public async Task<IActionResult> ConnectToken()
   {
     var request = HttpContext.GetOpenIddictServerRequest();
     var result = await _mediator.Send(new ConnectTokenCommand(request!));
-    
+
+    if (!result.IsValid)
+    {
+      return BadRequest(result.ValidationResult.Errors.Select(e => e.ErrorMessage));
+    }
+
+    return result.Data!;
+  }
+
+  [HttpGet("~/connect/userinfo")]
+  [HttpPost("~/connect/userinfo")]
+  [Authorize]
+  [Produces("application/json")]
+  public async Task<IActionResult> UserInfo()
+  {
+    var result = await _mediator.Send(new UserInfoQuery());
+
     if (!result.IsValid)
     {
       return BadRequest(result.ValidationResult.Errors.Select(e => e.ErrorMessage));

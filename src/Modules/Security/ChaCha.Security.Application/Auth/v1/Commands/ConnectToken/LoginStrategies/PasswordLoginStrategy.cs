@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using ChaCha.Security.Domain.Users;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -10,41 +11,70 @@ namespace ChaCha.Security.Application.Auth.v1.Commands.ConnectToken.LoginStrateg
 
 public sealed class PasswordLoginStrategy : ILoginStrategy
 {
-  private readonly IOpenIddictApplicationManager _applicationManager;
   private readonly UserManager<User> _userManager;
 
-  public PasswordLoginStrategy(IOpenIddictApplicationManager applicationManager, UserManager<User> userManager)
+  public PasswordLoginStrategy(UserManager<User> userManager)
   {
-    _applicationManager = applicationManager;
     _userManager = userManager;
   }
-  public async Task<Microsoft.AspNetCore.Mvc.SignInResult> HandleLogin(OpenIddictRequest request, CancellationToken cancellationToken)
+  public async Task<IActionResult> HandleLogin(OpenIddictRequest request, CancellationToken cancellationToken)
   {
     var user = await _userManager.FindByEmailAsync(request.Username!);
-    if (user == null) return null;
+    if (user is null) return ForbidInvalidGrant("Invalid Grant");
 
-    var checkPasswordResult = await _userManager.CheckPasswordAsync(user, request.Password!);
-    if (!checkPasswordResult) return null;
+    if (!await _userManager.CheckPasswordAsync(user, request.Password!))
+      return ForbidInvalidGrant("Invalid Grant");
 
-    var identity = new ClaimsIdentity(TokenValidationParameters.DefaultAuthenticationType, OpenIddictConstants.Claims.Name, OpenIddictConstants.Claims.Role);
-    identity.SetClaim(OpenIddictConstants.Claims.Subject, user.Id);
-    identity.SetClaim(OpenIddictConstants.Claims.Name, user.FullName);
-    identity.SetClaim(OpenIddictConstants.Claims.Email, user.Email);
+    var identity = new ClaimsIdentity(
+        authenticationType: TokenValidationParameters.DefaultAuthenticationType,
+        nameType: OpenIddictConstants.Claims.Name,
+        roleType: OpenIddictConstants.Claims.Role);
+
+    identity.SetClaim(OpenIddictConstants.Claims.Subject, user.Id.ToString());
+    identity.SetClaim(OpenIddictConstants.Claims.Name, user.FullName ?? user.UserName ?? "");
+    identity.SetClaim(OpenIddictConstants.Claims.Email, user.Email ?? "");
     identity.SetClaim(OpenIddictConstants.Claims.EmailVerified, user.EmailConfirmed);
 
-    identity.SetDestinations(static claim => claim.Type switch
-      {
-         // Allow the "name" claim to be stored in both the access and identity tokens
-         // when the "profile" scope was granted (by calling principal.SetScopes(...)).
-        OpenIddictConstants.Claims.Name when claim.Subject!.HasScope(OpenIddictConstants.Scopes.Profile)
-                  => [OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken],
+    var principal = new ClaimsPrincipal(identity);
 
-         // Otherwise, only store the claim in the access tokens.
-        _ => [OpenIddictConstants.Destinations.AccessToken]
-      });
+    var requested = request.GetScopes();
+    var allowed = new[]
+    {
+            OpenIddictConstants.Scopes.OpenId, OpenIddictConstants.Scopes.Profile, OpenIddictConstants.Scopes.Email, OpenIddictConstants.Scopes.OfflineAccess, "api"
+        };
 
-    identity.SetScopes("openid", "profile", "api", "offline_access");
-    
+    principal.SetScopes(requested.Intersect(allowed));
+
+    foreach (var claim in principal.Claims)
+    {
+      claim.SetDestinations(GetDestinations(claim, principal));
+    }
+
     return new Microsoft.AspNetCore.Mvc.SignInResult(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+  }
+
+  private static IActionResult ForbidInvalidGrant(string description)
+  {
+    return new ForbidResult(
+      authenticationSchemes: new[] { OpenIddictServerAspNetCoreDefaults.AuthenticationScheme },
+      properties: new AuthenticationProperties(new Dictionary<string, string?>
+      {
+        ["Error"] = OpenIddictConstants.Errors.InvalidGrant,
+        ["ErrorDescription"] = description
+      }));
+  }
+
+  private static IEnumerable<string> GetDestinations(Claim claim, ClaimsPrincipal principal)
+  {
+    if (claim.Type == OpenIddictConstants.Claims.Name && principal.HasScope(OpenIddictConstants.Scopes.Profile))
+      return new[] { OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken };
+
+    if (claim.Type == OpenIddictConstants.Claims.Email && principal.HasScope(OpenIddictConstants.Scopes.Email))
+      return new[] { OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken };
+
+    if (claim.Type == OpenIddictConstants.Claims.Role)
+      return new[] { OpenIddictConstants.Destinations.AccessToken };
+
+    return new[] { OpenIddictConstants.Destinations.AccessToken };
   }
 }

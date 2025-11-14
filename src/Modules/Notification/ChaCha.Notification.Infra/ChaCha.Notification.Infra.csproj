@@ -8,8 +8,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ChaCha.Notification.Domain\ChaCha.Notification.Domain.csproj" />
+    <ProjectReference Include="..\ChaCha.Notification.Application\ChaCha.Notification.Application.csproj" />
     <ProjectReference Include="..\..\..\Packages\ChaCha.Data\ChaCha.Data.csproj" />
     <ProjectReference Include="..\..\..\Packages\ChaCha.Auth\ChaCha.Auth.csproj" />
+    <ProjectReference Include="..\..\..\Packages\ChaCha.Storage\ChaCha.Storage.csproj" />
   </ItemGroup>
 
   <ItemGroup>

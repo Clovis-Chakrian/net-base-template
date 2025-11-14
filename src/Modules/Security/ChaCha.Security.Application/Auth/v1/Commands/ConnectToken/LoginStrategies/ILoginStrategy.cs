@@ -5,5 +5,5 @@ namespace ChaCha.Security.Application.Auth.v1.Commands.ConnectToken.LoginStrateg
 
 public interface ILoginStrategy
 {
-  Task<SignInResult> HandleLogin(OpenIddictRequest request, CancellationToken cancellationToken);
+  Task<IActionResult> HandleLogin(OpenIddictRequest request, CancellationToken cancellationToken);
 }

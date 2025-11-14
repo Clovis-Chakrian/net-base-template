@@ -23,7 +23,135 @@ namespace ChaCha.Notification.Infra.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("ChaCha.Notification.Domain.NotificationsSent.NotificationSent", b =>
+            modelBuilder.Entity("ChaCha.Notification.Domain.NotificationChannels.NotificationChannel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_notification_channels");
+
+                    b.ToTable("notification_channels", "notification");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAt = new DateTime(2025, 11, 13, 2, 36, 29, 248, DateTimeKind.Utc).AddTicks(283),
+                            Description = "Representa o canal de envio de emails.",
+                            Name = "Email",
+                            UpdatedAt = new DateTime(2025, 11, 13, 2, 36, 29, 248, DateTimeKind.Utc).AddTicks(420)
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAt = new DateTime(2025, 11, 13, 2, 36, 29, 248, DateTimeKind.Utc).AddTicks(1119),
+                            Description = "Representa o canal de envio de whatsapps.",
+                            Name = "WhatsApp",
+                            UpdatedAt = new DateTime(2025, 11, 13, 2, 36, 29, 248, DateTimeKind.Utc).AddTicks(1120)
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedAt = new DateTime(2025, 11, 13, 2, 36, 29, 248, DateTimeKind.Utc).AddTicks(1123),
+                            Description = "Representa o canal de envio de SMS's.",
+                            Name = "SMS",
+                            UpdatedAt = new DateTime(2025, 11, 13, 2, 36, 29, 248, DateTimeKind.Utc).AddTicks(1123)
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CreatedAt = new DateTime(2025, 11, 13, 2, 36, 29, 248, DateTimeKind.Utc).AddTicks(1125),
+                            Description = "Representa o canal de envio de notificações push.",
+                            Name = "Push",
+                            UpdatedAt = new DateTime(2025, 11, 13, 2, 36, 29, 248, DateTimeKind.Utc).AddTicks(1125)
+                        });
+                });
+
+            modelBuilder.Entity("ChaCha.Notification.Domain.NotificationExternalProviders.NotificationExternalProvider", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_notification_external_providers");
+
+                    b.ToTable("notification_external_providers", "notification");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAt = new DateTime(2025, 11, 13, 2, 36, 29, 249, DateTimeKind.Utc).AddTicks(5179),
+                            Description = "Provider utilizado para envio de Email's.",
+                            Name = "Mailgun",
+                            UpdatedAt = new DateTime(2025, 11, 13, 2, 36, 29, 249, DateTimeKind.Utc).AddTicks(5181)
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAt = new DateTime(2025, 11, 13, 2, 36, 29, 249, DateTimeKind.Utc).AddTicks(5553),
+                            Description = "Provider utilizado para envio de push notifications.",
+                            Name = "Firebase",
+                            UpdatedAt = new DateTime(2025, 11, 13, 2, 36, 29, 249, DateTimeKind.Utc).AddTicks(5553)
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedAt = new DateTime(2025, 11, 13, 2, 36, 29, 249, DateTimeKind.Utc).AddTicks(5556),
+                            Description = "Provider utilizado para envio de WhatsApp ou SMS.",
+                            Name = "Twillio",
+                            UpdatedAt = new DateTime(2025, 11, 13, 2, 36, 29, 249, DateTimeKind.Utc).AddTicks(5557)
+                        });
+                });
+
+            modelBuilder.Entity("ChaCha.Notification.Domain.NotificationReasonsNotSent.NotificationReasonNotSent", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -34,54 +162,75 @@ namespace ChaCha.Notification.Infra.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("MessageId")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("message_id");
+                    b.Property<Guid>("NotificationSentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("notification_sent_id");
 
-                    b.Property<string>("MessageTemplateId")
+                    b.Property<string>("Reason")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("message_template_id");
-
-                    b.Property<string>("NotificationMethod")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("notification_method");
-
-                    b.Property<string>("NotificationProvider")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("notification_provider");
-
-                    b.Property<string>("Personalizations")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("personalizations");
-
-                    b.Property<DateTime?>("SentDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("sent_date");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("reason");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id")
-                        .HasName("pk_notifications_sent");
+                        .HasName("pk_notification_reasons_not_sent");
 
-                    b.HasIndex("MessageId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_notifications_sent_message_id");
+                    b.HasIndex("NotificationSentId")
+                        .HasDatabaseName("ix_notification_reasons_not_sent_notification_sent_id");
 
-                    b.ToTable("notifications_sent", "notification");
+                    b.ToTable("notification_reasons_not_sent", "notification");
                 });
 
-            modelBuilder.Entity("ChaCha.Notification.Domain.TokenTypes.TokenType", b =>
+            modelBuilder.Entity("ChaCha.Notification.Domain.NotificationSentParamsValues.NotificationSentParamValue", b =>
                 {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("NotificationSentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("notification_sent_id");
+
+                    b.Property<Guid>("NotificationTemplateParamId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("notification_template_param_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(350)
+                        .HasColumnType("character varying(350)")
+                        .HasColumnName("value");
+
+                    b.HasKey("Id")
+                        .HasName("pk_notification_sent_param_value");
+
+                    b.HasIndex("NotificationSentId")
+                        .HasDatabaseName("ix_notification_sent_param_value_notification_sent_id");
+
+                    b.HasIndex("NotificationTemplateParamId")
+                        .HasDatabaseName("ix_notification_sent_param_value_notification_template_param_id");
+
+                    b.ToTable("notification_sent_param_value", "notification");
+                });
+
+            modelBuilder.Entity("ChaCha.Notification.Domain.NotificationTemplateParams.NotificationTemplateParam", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
                         .HasColumnName("id");
 
                     b.Property<DateTime>("CreatedAt")
@@ -90,84 +239,143 @@ namespace ChaCha.Notification.Infra.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)")
                         .HasColumnName("description");
-
-                    b.Property<int>("ExpirationTime")
-                        .HasColumnType("integer")
-                        .HasColumnName("expiration_time");
-
-                    b.Property<int>("MaxAttempts")
-                        .HasColumnType("integer")
-                        .HasColumnName("max_attempts");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
                         .HasColumnName("name");
 
-                    b.Property<int>("ResentLimit")
-                        .HasColumnType("integer")
-                        .HasColumnName("resent_limit");
-
-                    b.Property<int>("TokenLength")
-                        .HasColumnType("integer")
-                        .HasColumnName("token_length");
+                    b.Property<Guid>("NotificationTemplateId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("notification_template_id");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id")
-                        .HasName("pk_token_types");
+                        .HasName("pk_notification_template_param");
 
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasDatabaseName("ix_token_types_name");
+                    b.HasIndex("NotificationTemplateId")
+                        .HasDatabaseName("ix_notification_template_param_notification_template_id");
 
-                    b.ToTable("token_types", "notification");
+                    b.ToTable("notification_template_param", "notification");
+                });
+
+            modelBuilder.Entity("ChaCha.Notification.Domain.NotificationTemplates.NotificationTemplate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Body")
+                        .HasMaxLength(3000)
+                        .HasColumnType("character varying(3000)")
+                        .HasColumnName("body");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("ExternalTemplateId")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("external_template_id");
+
+                    b.Property<int>("NotificationChannelId")
+                        .HasColumnType("integer")
+                        .HasColumnName("notification_channel_id");
+
+                    b.Property<int>("NotificationExternalProviderId")
+                        .HasColumnType("integer")
+                        .HasColumnName("notification_external_provider_id");
+
+                    b.Property<int>("NotificationTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("notification_type_id");
+
+                    b.Property<string>("Subject")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("subject");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_notification_templates");
+
+                    b.HasIndex("NotificationChannelId")
+                        .HasDatabaseName("ix_notification_templates_notification_channel_id");
+
+                    b.HasIndex("NotificationExternalProviderId")
+                        .HasDatabaseName("ix_notification_templates_notification_external_provider_id");
+
+                    b.HasIndex("NotificationTypeId")
+                        .HasDatabaseName("ix_notification_templates_notification_type_id");
+
+                    b.ToTable("notification_templates", "notification");
+                });
+
+            modelBuilder.Entity("ChaCha.Notification.Domain.NotificationTypes.NotificationType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_notification_types");
+
+                    b.ToTable("notification_types", "notification");
 
                     b.HasData(
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2025, 9, 24, 3, 14, 52, 982, DateTimeKind.Utc).AddTicks(3101),
-                            Description = "Token used to multi factor authentication",
-                            ExpirationTime = 5,
-                            MaxAttempts = 5,
-                            Name = "MFA",
-                            ResentLimit = 5,
-                            TokenLength = 6,
-                            UpdatedAt = new DateTime(2025, 9, 24, 3, 14, 52, 982, DateTimeKind.Utc).AddTicks(4079)
+                            CreatedAt = new DateTime(2025, 11, 13, 2, 36, 29, 263, DateTimeKind.Utc).AddTicks(9723),
+                            Description = "Notificações relacionadas ao sistema e possíveis falhas que ocorram.",
+                            Name = "System",
+                            UpdatedAt = new DateTime(2025, 11, 13, 2, 36, 29, 263, DateTimeKind.Utc).AddTicks(9727)
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2025, 9, 24, 3, 14, 52, 982, DateTimeKind.Utc).AddTicks(5204),
-                            Description = "One Time Password token",
-                            ExpirationTime = 5,
-                            MaxAttempts = 5,
-                            Name = "OTP",
-                            ResentLimit = 5,
-                            TokenLength = 9,
-                            UpdatedAt = new DateTime(2025, 9, 24, 3, 14, 52, 982, DateTimeKind.Utc).AddTicks(5205)
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreatedAt = new DateTime(2025, 9, 24, 3, 14, 52, 982, DateTimeKind.Utc).AddTicks(5207),
-                            Description = "Recover account token",
-                            ExpirationTime = 5,
-                            MaxAttempts = 5,
-                            Name = "RecoverAccount",
-                            ResentLimit = 5,
-                            TokenLength = 6,
-                            UpdatedAt = new DateTime(2025, 9, 24, 3, 14, 52, 982, DateTimeKind.Utc).AddTicks(5207)
+                            CreatedAt = new DateTime(2025, 11, 13, 2, 36, 29, 264, DateTimeKind.Utc).AddTicks(24),
+                            Description = "Notificações sobre ocorrências do sistema para os usuários.",
+                            Name = "Transactional",
+                            UpdatedAt = new DateTime(2025, 11, 13, 2, 36, 29, 264, DateTimeKind.Utc).AddTicks(25)
                         });
                 });
 
-            modelBuilder.Entity("ChaCha.Notification.Domain.TokensSent.TokenSent", b =>
+            modelBuilder.Entity("ChaCha.Notification.Domain.NotificationsSent.NotificationSent", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -178,86 +386,225 @@ namespace ChaCha.Notification.Infra.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("attempts");
 
+                    b.Property<Guid>("CorrelationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlation_id");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("DataCheck")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("data_check");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("expires_at");
-
-                    b.Property<Guid>("NotificationSentId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("notification_sent_id");
-
-                    b.Property<string>("Salt")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("salt");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("token");
-
-                    b.Property<int>("TokenTypeId")
+                    b.Property<int>("NotificationChannelId")
                         .HasColumnType("integer")
-                        .HasColumnName("token_type_id");
+                        .HasColumnName("notification_channel_id");
+
+                    b.Property<int>("NotificationExternalProviderId")
+                        .HasColumnType("integer")
+                        .HasColumnName("notification_external_provider_id");
+
+                    b.Property<string>("NotificationExternalProviderRequestId")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("notification_external_provider_request_id");
+
+                    b.Property<Guid>("NotificationTemplateId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("notification_template_id");
+
+                    b.Property<int>("NotificationTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("notification_type_id");
+
+                    b.Property<DateTime?>("SentTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sent_time");
+
+                    b.Property<bool>("ShouldRetry")
+                        .HasColumnType("boolean")
+                        .HasColumnName("should_retry");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .HasColumnType("character varying(25)")
+                        .HasColumnName("status");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<bool>("Used")
-                        .HasColumnType("boolean")
-                        .HasColumnName("used");
-
-                    b.Property<DateTime?>("UsedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("used_at");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
 
                     b.HasKey("Id")
-                        .HasName("pk_tokens_sent");
+                        .HasName("pk_notifications_sent");
 
-                    b.HasIndex("NotificationSentId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_tokens_sent_notification_sent_id");
+                    b.HasIndex("NotificationChannelId")
+                        .HasDatabaseName("ix_notifications_sent_notification_channel_id");
 
-                    b.HasIndex("Token")
-                        .IsUnique()
-                        .HasDatabaseName("ix_tokens_sent_token");
+                    b.HasIndex("NotificationExternalProviderId")
+                        .HasDatabaseName("ix_notifications_sent_notification_external_provider_id");
 
-                    b.HasIndex("TokenTypeId")
-                        .HasDatabaseName("ix_tokens_sent_token_type_id");
+                    b.HasIndex("NotificationTemplateId")
+                        .HasDatabaseName("ix_notifications_sent_notification_template_id");
 
-                    b.ToTable("tokens_sent", "notification");
+                    b.HasIndex("NotificationTypeId")
+                        .HasDatabaseName("ix_notifications_sent_notification_type_id");
+
+                    b.ToTable("notifications_sent", "notification");
                 });
 
-            modelBuilder.Entity("ChaCha.Notification.Domain.TokensSent.TokenSent", b =>
+            modelBuilder.Entity("ChaCha.Notification.Domain.NotificationReasonsNotSent.NotificationReasonNotSent", b =>
                 {
                     b.HasOne("ChaCha.Notification.Domain.NotificationsSent.NotificationSent", "NotificationSent")
-                        .WithOne()
-                        .HasForeignKey("ChaCha.Notification.Domain.TokensSent.TokenSent", "NotificationSentId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .WithMany("ReasonsNotSent")
+                        .HasForeignKey("NotificationSentId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_tokens_sent_notifications_sent_notification_sent_id");
+                        .HasConstraintName("fk_notification_reasons_not_sent_notifications_sent_notificati");
 
-                    b.HasOne("ChaCha.Notification.Domain.TokenTypes.TokenType", "TokenType")
-                        .WithMany()
-                        .HasForeignKey("TokenTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                    b.Navigation("NotificationSent");
+                });
+
+            modelBuilder.Entity("ChaCha.Notification.Domain.NotificationSentParamsValues.NotificationSentParamValue", b =>
+                {
+                    b.HasOne("ChaCha.Notification.Domain.NotificationsSent.NotificationSent", "NotificationSent")
+                        .WithMany("NotificationSentParamValues")
+                        .HasForeignKey("NotificationSentId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_tokens_sent_token_types_token_type_id");
+                        .HasConstraintName("fk_notification_sent_param_value_notifications_sent_notificati");
+
+                    b.HasOne("ChaCha.Notification.Domain.NotificationTemplateParams.NotificationTemplateParam", "NotificationTemplateParam")
+                        .WithMany("NotificationSentParamValues")
+                        .HasForeignKey("NotificationTemplateParamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_notification_sent_param_value_notification_template_param_n");
 
                     b.Navigation("NotificationSent");
 
-                    b.Navigation("TokenType");
+                    b.Navigation("NotificationTemplateParam");
+                });
+
+            modelBuilder.Entity("ChaCha.Notification.Domain.NotificationTemplateParams.NotificationTemplateParam", b =>
+                {
+                    b.HasOne("ChaCha.Notification.Domain.NotificationTemplates.NotificationTemplate", "NotificationTemplate")
+                        .WithMany("NotificationTemplateParams")
+                        .HasForeignKey("NotificationTemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_notification_template_param_notification_templates_notifica");
+
+                    b.Navigation("NotificationTemplate");
+                });
+
+            modelBuilder.Entity("ChaCha.Notification.Domain.NotificationTemplates.NotificationTemplate", b =>
+                {
+                    b.HasOne("ChaCha.Notification.Domain.NotificationChannels.NotificationChannel", "NotificationChannel")
+                        .WithMany("NotificationTemplates")
+                        .HasForeignKey("NotificationChannelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_notification_templates_notification_channels_notification_c");
+
+                    b.HasOne("ChaCha.Notification.Domain.NotificationExternalProviders.NotificationExternalProvider", "NotificationExternalProvider")
+                        .WithMany("NotificationTemplates")
+                        .HasForeignKey("NotificationExternalProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_notification_templates_notification_external_providers_noti");
+
+                    b.HasOne("ChaCha.Notification.Domain.NotificationTypes.NotificationType", "NotificationType")
+                        .WithMany("NotificationTemplates")
+                        .HasForeignKey("NotificationTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_notification_templates_notification_types_notification_type");
+
+                    b.Navigation("NotificationChannel");
+
+                    b.Navigation("NotificationExternalProvider");
+
+                    b.Navigation("NotificationType");
+                });
+
+            modelBuilder.Entity("ChaCha.Notification.Domain.NotificationsSent.NotificationSent", b =>
+                {
+                    b.HasOne("ChaCha.Notification.Domain.NotificationChannels.NotificationChannel", "NotificationChannel")
+                        .WithMany("NotificationSents")
+                        .HasForeignKey("NotificationChannelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_notifications_sent_notification_channels_notification_chann");
+
+                    b.HasOne("ChaCha.Notification.Domain.NotificationExternalProviders.NotificationExternalProvider", "NotificationExternalProvider")
+                        .WithMany("NotificationSents")
+                        .HasForeignKey("NotificationExternalProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_notifications_sent_notification_external_providers_notifica");
+
+                    b.HasOne("ChaCha.Notification.Domain.NotificationTemplates.NotificationTemplate", "NotificationTemplate")
+                        .WithMany()
+                        .HasForeignKey("NotificationTemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_notifications_sent_notification_templates_notification_temp");
+
+                    b.HasOne("ChaCha.Notification.Domain.NotificationTypes.NotificationType", "NotificationType")
+                        .WithMany("NotificationSents")
+                        .HasForeignKey("NotificationTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_notifications_sent_notification_types_notification_type_id");
+
+                    b.Navigation("NotificationChannel");
+
+                    b.Navigation("NotificationExternalProvider");
+
+                    b.Navigation("NotificationTemplate");
+
+                    b.Navigation("NotificationType");
+                });
+
+            modelBuilder.Entity("ChaCha.Notification.Domain.NotificationChannels.NotificationChannel", b =>
+                {
+                    b.Navigation("NotificationSents");
+
+                    b.Navigation("NotificationTemplates");
+                });
+
+            modelBuilder.Entity("ChaCha.Notification.Domain.NotificationExternalProviders.NotificationExternalProvider", b =>
+                {
+                    b.Navigation("NotificationSents");
+
+                    b.Navigation("NotificationTemplates");
+                });
+
+            modelBuilder.Entity("ChaCha.Notification.Domain.NotificationTemplateParams.NotificationTemplateParam", b =>
+                {
+                    b.Navigation("NotificationSentParamValues");
+                });
+
+            modelBuilder.Entity("ChaCha.Notification.Domain.NotificationTemplates.NotificationTemplate", b =>
+                {
+                    b.Navigation("NotificationTemplateParams");
+                });
+
+            modelBuilder.Entity("ChaCha.Notification.Domain.NotificationTypes.NotificationType", b =>
+                {
+                    b.Navigation("NotificationSents");
+
+                    b.Navigation("NotificationTemplates");
+                });
+
+            modelBuilder.Entity("ChaCha.Notification.Domain.NotificationsSent.NotificationSent", b =>
+                {
+                    b.Navigation("NotificationSentParamValues");
+
+                    b.Navigation("ReasonsNotSent");
                 });
 #pragma warning restore 612, 618
         }

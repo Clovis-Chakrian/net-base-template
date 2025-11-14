@@ -29,20 +29,27 @@ public class Worker : IHostedService
       {
         ClientId = "service-worker",
         ClientSecret = "388D45FA-B36B-4988-BA59-B187D329C207",
+        ClientType = OpenIddictConstants.ClientTypes.Confidential,
+        DisplayName = "Service Worker (Password Flow)",
+
         Permissions =
-                {
-                    OpenIddictConstants.Permissions.Endpoints.Token,
-                    OpenIddictConstants.Permissions.GrantTypes.ClientCredentials,
-                    OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
-                    OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
-                    OpenIddictConstants.Permissions.GrantTypes.Password,
-                    OpenIddictConstants.Permissions.ResponseTypes.Code,
-                    OpenIddictConstants.Permissions.Scopes.Profile,
-                    OpenIddictConstants.Permissions.ResponseTypes.IdTokenToken,
-                    OpenIddictConstants.Permissions.ResponseTypes.Token,
-                    OpenIddictConstants.Permissions.ResponseTypes.IdToken,
-                    OpenIddictConstants.Permissions.ResponseTypes.CodeIdTokenToken,
-                }
+        {
+            // Endpoints que este client poderá chamar
+            OpenIddictConstants.Permissions.Endpoints.Token,
+          OpenIddictConstants.Permissions.Prefixes.Endpoint + "userinfo",   // << necessário para /connect/userinfo
+            OpenIddictConstants.Permissions.Endpoints.Revocation, // se você usa revogação (opcional)
+
+            // Grant types
+            OpenIddictConstants.Permissions.GrantTypes.Password,
+            OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
+
+            // Scopes OIDC + o seu "api"
+            OpenIddictConstants.Permissions.Prefixes.Scope + "openid",
+            OpenIddictConstants.Permissions.Scopes.Profile,
+            OpenIddictConstants.Permissions.Scopes.Email,
+            OpenIddictConstants.Permissions.Prefixes.Scope + "offline_access",
+            OpenIddictConstants.Permissions.Prefixes.Scope + "api"
+        }
       });
     }
   }

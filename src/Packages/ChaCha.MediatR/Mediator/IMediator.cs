@@ -10,5 +10,5 @@ public interface IMediator
   Task<Result> Send(ICommand command, CancellationToken cancellationToken = default);
   Task<Result<TResponse>> Send<TResponse>(IQuery<TResponse> query, CancellationToken cancellationToken = default);
   Task<Result> Send(IQuery query, CancellationToken cancellationToken = default);
-  public void PublishEvent(IDomainEvent domainEvent, CancellationToken cancellationToken = default);
+  Task PublishEvent(IDomainEvent domainEvent, CancellationToken cancellationToken = default);
 }

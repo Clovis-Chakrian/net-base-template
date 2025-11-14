@@ -14,5 +14,6 @@
     <ProjectReference Include="..\ChaCha.Notification.Application\ChaCha.Notification.Application.csproj" />
     <ProjectReference Include="..\ChaCha.Notification.Infra\ChaCha.Notification.Infra.csproj" />
     <ProjectReference Include="..\..\..\Packages\ChaCha.Auth\ChaCha.Auth.csproj" />
+    <ProjectReference Include="..\..\..\Packages\ChaCha.WebApi\ChaCha.WebApi.csproj" />
   </ItemGroup>
 </Project>

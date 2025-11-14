@@ -4,6 +4,8 @@ using ChaCha.MediatR.DomainEvents;
 using ChaCha.Bus;
 using EasyNetQ;
 using ChaCha.IntegrationEvents.Users.Created;
+using ChaCha.IntegrationEvents.Notifications.Emails;
+using System.Threading.Tasks;
 
 namespace ChaCha.Security.Application.Users.v1.DomainEvents;
 
@@ -18,17 +20,24 @@ public class UserCreatedDomainEventHandler : IDomainEventHandler<UserCreatedEven
     _bus = bus;
   }
 
-  public void Handle(UserCreatedEvent domainEvent, CancellationToken cancellationToken)
+  public async Task Handle(UserCreatedEvent domainEvent, CancellationToken cancellationToken)
   {
     _logger.LogInformation("User created with ID: {UserId} - Full Name: {FullName} - Email: {Email}", domainEvent.UserId, domainEvent.FullName, domainEvent.Email);
-    var createdUserIntegrationEventObject = new CreatedUserIntegrationEventObject(
-      userId: domainEvent.UserId,
-      fullName: domainEvent.FullName,
-      email: domainEvent.Email
-      );
 
-    var createdUserIntegrationEvent = new CreatedUserIntegrationEvent(createdUserIntegrationEventObject);
-    
-    _bus.PublishAsync<CreatedUserIntegrationEvent, CreatedUserIntegrationEventObject>(createdUserIntegrationEvent, cancellationToken);
+    var sendEmailIntegrationEventObject = new SendEmailIntegrationEventObject(
+      templateId: Guid.Parse("75762fed-89e0-4c98-9e3f-acad86361c1b"),
+      subject: "Bem vindo!",
+      tos: new List<string> { domainEvent.Email },
+      templateParams: new Dictionary<string, string>
+      {
+        ["UserName"] = domainEvent.FullName,
+        ["PlatformLink"] = "https://youtube.com",
+        ["CancelInscriptionLink"] = "https://youtube.com"
+      }
+    );
+
+    var sendEmailIntegrationEvent = new SendEmailIntegrationEvent(sendEmailIntegrationEventObject);
+
+    await _bus.PublishAsync<SendEmailIntegrationEvent, SendEmailIntegrationEventObject>(sendEmailIntegrationEvent, cancellationToken);
   }
 }

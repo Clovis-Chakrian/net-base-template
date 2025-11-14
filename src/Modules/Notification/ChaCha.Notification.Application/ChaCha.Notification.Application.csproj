@@ -9,8 +9,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Packages\ChaCha.MediatR\ChaCha.MediatR.csproj" />
     <ProjectReference Include="..\ChaCha.Notification.Domain\ChaCha.Notification.Domain.csproj" />
-    <ProjectReference Include="..\ChaCha.Notification.Infra\ChaCha.Notification.Infra.csproj" />
     <ProjectReference Include="..\..\..\Packages\ChaCha.Bus\ChaCha.Bus.csproj" />
     <ProjectReference Include="..\..\..\Packages\ChaCha.IntegrationEvents\ChaCha.IntegrationEvents.csproj" />
+    <ProjectReference Include="..\..\..\Packages\ChaCha.Data\ChaCha.Data.csproj" />
+    <ProjectReference Include="..\..\..\Packages\ChaCha.Auth\ChaCha.Auth.csproj" />
   </ItemGroup>
 </Project>
